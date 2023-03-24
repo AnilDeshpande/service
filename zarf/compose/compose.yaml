@@ -33,6 +33,7 @@ services:
     depends_on:
       - zipkin
       - db
+      - kafka
 
   metrics:
     container_name: metrics
@@ -44,3 +45,49 @@ services:
       - 4001:4001 # DEBUG API
     depends_on:
       - sales-api
+
+
+  kafka:
+    image: bitnami/kafka:latest
+    ports:
+      - 9092:9092
+    environment:
+      ALLOW_PLAINTEXT_LISTENER: "yes"
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://:9092
+      KAFKA_BROKER_ID: 1
+      KAFKA_LISTENERS: PLAINTEXT://:9092
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ZOOKEEPER_PROTOCOL: PLAINTEXT
+    depends_on:
+      - zookeeper
+   
+  zookeeper:
+    image: bitnami/kafka:latest
+    ports:
+      - 2181:2181
+    environment:
+      ALLOW_ANONYMOUS_LOGIN: "yes"
+      ZOO_LISTEN_ALLIPS_ENABLED: "yes"
+
+
+  # zookeeper:
+  #   hostname: zookeeper
+  #   image: wurstmeister/zookeeper:3.4.6
+  #   expose:
+  #   - "2181"
+  #   ports:
+  #   - "2181:2181"
+  
+  # kafka:
+  #   image: wurstmeister/kafka
+  #   env_file:
+  #   - kafka-variables.env
+  #   depends_on:
+  #   - zookeeper
+  #   ports:
+  #   - '9092:9092'
+  #   - '8082:8082'
+  #   - '8083:8083'
+  #   restart: on-failure
+
+    

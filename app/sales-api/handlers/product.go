@@ -6,9 +6,12 @@ import (
 
 	"github.com/ardanlabs/service/business/auth"
 	"github.com/ardanlabs/service/business/data/product"
+	"github.com/ardanlabs/service/foundation/messaging"
 	"github.com/ardanlabs/service/foundation/web"
+
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
+	kafka "github.com/segmentio/kafka-go"
 	"go.opentelemetry.io/otel/api/global"
 )
 
@@ -70,6 +73,16 @@ func (h *productHandlers) create(ctx context.Context, w http.ResponseWriter, r *
 	prod, err := product.Create(ctx, h.db, claims, np, v.Now)
 	if err != nil {
 		return errors.Wrapf(err, "creating new product: %+v", np)
+	}
+
+	//kafka producer logic
+	msg := kafka.Message{
+		Key:   []byte(prod.UserID), // kafka message key
+		Value: []byte(prod.UserID),
+	}
+
+	if err := messaging.ProduceMessage(ctx, msg); err != nil {
+		return web.NewRequestError(errors.Wrap(err, "ERROR occurs in KAKFA Producer"), http.StatusInternalServerError)
 	}
 
 	return web.Respond(ctx, w, prod, http.StatusCreated)

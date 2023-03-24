@@ -10,6 +10,13 @@ export PROJECT = ardan-starter-kit
 # curl -H "Authorization: Bearer ${TOKEN}" http://localhost:3000/v1/users
 # hey -m GET -c 100 -n 10000 -H "Authorization: Bearer ${TOKEN}" http://localhost:3000/v1/users
 
+
+# Expvarmon in the makefile
+# GitHub - rakyll/hey: HTTP load generator, ApacheBench (ab) replacement
+# go install github.com/divan/expvarmon@latest
+# go install github.com/rakyll/hey@latest
+# hey -m GET -c 100 -n 1000 http://localhost:3000/readiness/10
+
 # ==============================================================================
 # Building containers
 

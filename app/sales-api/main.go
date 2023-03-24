@@ -18,6 +18,7 @@ import (
 	"github.com/ardanlabs/service/app/sales-api/handlers"
 	"github.com/ardanlabs/service/business/auth"
 	"github.com/ardanlabs/service/foundation/database"
+	"github.com/ardanlabs/service/foundation/messaging"
 	"github.com/ardanlabs/service/foundation/tracer"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/pkg/errors"
@@ -69,6 +70,11 @@ func run(log *log.Logger) error {
 			Name       string `conf:"default:postgres"`
 			DisableTLS bool   `conf:"default:false"`
 		}
+		KAFKA struct {
+			URL string `conf:"default:kafka:9092"`
+			// BootstrapServers string `conf:"default:localhost:9092"`
+			TOPIC string `conf:"default:product"`
+		}
 		Auth struct {
 			KeyID          string `conf:"default:54bb2165-71e1-41a6-af3e-7da4a0e1e2c1"`
 			PrivateKeyFile string `conf:"default:/app/private.pem"`
@@ -102,6 +108,16 @@ func run(log *log.Logger) error {
 		}
 		return errors.Wrap(err, "parsing config")
 	}
+
+	// =========================================================================
+	// KAFKA
+	kafkaWriter := messaging.GetKafkaWriter(cfg.KAFKA.URL, cfg.KAFKA.TOPIC, log)
+	defer kafkaWriter.Close()
+
+	// err := kafkaWriter.WriteMessages(context.Background(), kafka.Message{Key: []byte("rahul33333"), Value: []byte("more")})
+	// if err != nil {
+	// 	return err
+	// }
 
 	// =========================================================================
 	// App Starting
